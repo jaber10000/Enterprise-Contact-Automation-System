@@ -1,78 +1,79 @@
-# Role-Based Contact Automation with n8n
+# Enterprise Contact Automation System with n8n
 
-An n8n workflow that receives portfolio contact-form submissions through a webhook, prepares the submitted data, routes requests by subject, logs contact details in Google Sheets, and sends notifications or email replies.
+An enhanced contact-management automation concept built in n8n. It receives contact submissions through a webhook, evaluates validation conditions, prepares contact data, routes inquiries by category, logs records in Google Sheets, and connects email and Telegram notifications.
 
 ## Overview
 
-This project demonstrates a practical no-code/low-code automation pattern for handling inbound website inquiries.
+The workflow is designed to demonstrate a more structured inbound-contact process, including a conditional validation step before downstream processing.
 
-### Workflow
+### Intended Flow
 
-1. **Webhook** — receives a `POST` request from a contact form.
-2. **prepare_data** — maps the name, email, phone, subject, message, and timestamp into consistent fields.
-3. **Switch** — routes submissions by subject:
+1. **Webhook** — receives a `POST` request.
+2. **If** — evaluates conditions for required contact fields and message content.
+3. **prepare_data** — maps the contact fields and timestamp.
+4. **Switch** — routes requests by subject:
    - Booking
    - Career
    - Complaint
    - General
    - Partnership
-4. **Telegram** — sends a booking notification.
-5. **Google Sheets** — appends contact details to a spreadsheet.
-6. **Gmail** — sends an internal notification and/or an acknowledgement email, depending on the route.
+5. **Google Sheets** — appends contact details to a worksheet.
+6. **Telegram and Gmail** — provide notifications and an acknowledgement email.
+7. **Respond to Webhook** — provides a response on the alternate branch.
 
 ## Tech Stack
 
 - n8n workflow automation
-- Webhooks and JSON payloads
+- Webhooks and JSON
+- Conditional logic
 - Google Sheets
 - Gmail
 - Telegram Bot API
 
 ## Example Request
 
-Configure your webhook to accept a JSON body like:
-
 ```json
 {
   "user_name": "Jane Doe",
   "user_email": "jane@example.com",
   "phone": "+1-555-0100",
-  "subject": "Booking",
-  "message": "I would like to discuss a booking."
+  "subject": "General",
+  "message": "I have a question about your services."
 }
 ```
 
-The workflow maps the incoming values from `body.user_name`, `body.user_email`, `body.phone`, `body.subject`, and `body.message`.
-
 ## Setup
 
-1. Install or access an n8n instance.
-2. Import `workflow.json` into n8n.
-3. Configure the Webhook node and use your own test/production webhook URL.
-4. Connect your own Telegram, Google Sheets, and Gmail credentials.
-5. Select your own spreadsheet and worksheet, and map the expected columns:
-   `Date`, `Name`, `Email`, `Phone`, `Subject`, `Message`.
-6. Review every Switch rule and confirm the intended destinations for all five categories.
-7. Test with sample submissions before activating the workflow.
+1. Import `workflow.json` into your n8n instance.
+2. Configure a new webhook URL.
+3. Connect your own Google Sheets, Gmail, and Telegram credentials.
+4. Replace placeholder recipient IDs and spreadsheet references with your own settings.
+5. Review the If node's conditions and connect its true/false outputs to the intended next steps.
+6. Check that the validation logic matches the incoming JSON schema.
+7. Review all Switch rules and confirm category-to-action mappings.
+8. Test valid, invalid, missing-field, and unknown-subject submissions before activation.
 
 ## Security Notes
 
-- The included workflow export is sanitized for sharing. Reconnect credentials and replace placeholder destinations before use.
-- Do not commit API tokens, OAuth secrets, private webhook URLs, personal contact data, or production spreadsheet IDs.
-- Use test accounts and sample data while developing.
+The included export has been sanitized for public sharing. Credentials and destination identifiers must be configured in your own n8n instance. Never commit tokens, OAuth secrets, private webhook URLs, or real contact records.
 
-## Known Limitations
+## Validation and Testing Status
 
-This repository is based on a workflow export and has not been represented as production-tested. Review the Switch conditions and branch connections in n8n before use. In particular, verify that each category matches the intended subject and that notifications and acknowledgements are sent only to the intended recipients.
+This repository represents an exported workflow design, not a claim of production readiness. The supplied workflow contains configuration details that should be reviewed before deployment:
+
+- The If node's true branch should be checked to ensure it reaches `prepare_data`; the provided connections do not show that connection.
+- Review each If condition, especially the email/message-count condition, to confirm that its operator, value types, and expressions match the intended validation rule.
+- Review the Switch rules: some conditions appear to use fixed text rather than the incoming `Subject` field.
+- Confirm the webhook response code and response behavior are appropriate for your client.
 
 ## Future Improvements
 
-- Add robust validation and a clear fallback route for unknown subjects.
-- Add error handling and retry logic for integrations.
-- Add spam protection and rate limiting.
-- Add execution logging and monitoring.
-- Add a test matrix for each category.
+- Define a clear validation schema and consistent error responses.
+- Add a fallback branch for unsupported categories.
+- Add duplicate detection, spam protection, and rate limiting.
+- Add retries, error workflows, and monitoring.
+- Create test cases for valid and invalid submissions.
 
 ## License
 
-Choose a license before making this repository public. For example, add an MIT `LICENSE` file if you want to allow reuse under those terms.
+Choose and add a license before publishing. An MIT license is one option if you intend to permit reuse under those terms.
